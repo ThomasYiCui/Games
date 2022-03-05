@@ -306,7 +306,7 @@
                     case "menu":
                         starBackground();
                         fill(255, 255, 255);
-                        text("Space Battle", canvas.width/2, canvas.height/2 - 75);
+                        text("Space Battle", canvas.width/2, canvas.height/2 - 75, 50);
                         stroke(255, 255, 255);
                         button(canvas.width/2 - 100, canvas.height/2 + 25, 200, 40, function() {
                             scene = "game"
@@ -350,7 +350,7 @@
                     case "gameover":
                         starBackground();
                         fill(255, 255, 255);
-                        text("GG", canvas.width/2, canvas.height/2 - 75);
+                        text("GG", canvas.width/2, canvas.height/2 - 75, 50);
                         stroke(255, 255, 255)
                         button(canvas.width/2 - 100, canvas.height/2 - 25, 200, 40, function() {
                             scene = "menu"
