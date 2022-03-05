@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>New webpage</title>
+    </head>
+        <style>
+            body {
+                position: fixed;
+            }
+            #canvi {
+                margin-left: -10px;
+                margin-top: -10px;
+            }
+        </style>
+    <body>
+        <canvas id="canvi"></canvas>
+        
+        <script>
+            // makes it more like javascript
+            var canvas = document.getElementById("canvi");
+            var ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var mouseX = 0;
+            var mouseY = 0;
+            var clicked = false
+            var keys = [];
+            function cos(r) {
+                return Math.cos(r);
+            }
+            function sin(r) {
+                return Math.sin(r);
+            }
+            function atan2(y, x) {
+                return Math.atan2(y, x)
+            }
+            function round(num) {
+                return Math.round(num);
+            }
+            function random(min, max) {
+                return min + Math.random(0, 1) * (max - min);
+            }
+            function dist(x, y, x2, y2) {
+                var a = x - x2;
+                var b = y - y2;
+                return Math.sqrt(a * a + b * b);
+            }
+            function fill(r, g, b) {
+                ctx.fillStyle = "rgb(" + r + ", " + g + ", " + b + ")";
+            }
+            function stroke(r, g, b) {
+                ctx.strokeStyle = "rgb(" + r + ", " + g + ", " + b + ")";
+            }
+            function rect(x, y, w, h) {
+                ctx.fillRect(x, y, w, h);
+            }
+            function strokeWeight(s) {
+                ctx.lineWidth = s;
+            }
+            function eRect(x, y, w, h, col) {
+                ctx.beginPath();
+                stroke(col[0], col[1], col[2]);
+                ctx.rect(x, y, w, h);
+                ctx.stroke();
+            }
+            function start() {
+                var myVar = setInterval(draw, 1);
+            }
+            function text(txt, x, y, size) {
+                ctx.font = size + "px Arial";
+                ctx.fillText(txt, x, y);
+            }
+            function center(align) {
+                ctx.textAlign = align;
+            }
+            function lerp(a, b, t) {
+                return a + (b - a) * t;
+            }
+            function dist2(a, b, d) {
+                return (a - b) > -d && (a - b) < d;
+            }
+            function ellipse(x, y, radiusX, radiusY, rotation) {
+                ctx.beginPath();
+                ctx.ellipse(x, y, radiusX, radiusY, rotation, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            function constrain(num, m, ma) {
+                if(num < m) {
+                    num = m;
+                } else if(num > ma) {
+                    num = ma;
+                }
+                return num;
+            }
+            canvas.addEventListener("mousemove", function(e) { 
+                var cRect = canvas.getBoundingClientRect();
+                mouseX = Math.round(e.clientX - cRect.left);
+                mouseY = Math.round(e.clientY - cRect.top);
+            });
+            canvas.addEventListener("mousedown", function(e) {
+                clicked = true;
+            }, false);
+            window.addEventListener("keydown", keysPressed, false);
+            window.addEventListener("keyup", keysReleased, false);
+            function keysPressed(e) {
+                // store an entry for every key pressed
+                keys[e.keyCode] = true;
+             
+                e.preventDefault();
+            }
+             
+            function keysReleased(e) {
+                // mark keys that were released
+                keys[e.keyCode] = false;
+            }
+        </script>
+        <script>
+            // game
+            var scene = "game";
+            var player = {
+                x: canvas.width/2,
+                y: canvas.height/2,
+                r: 0,
+                mom: 0,
+                cool: 10,
+            };
+            function starBackground() {
+                fill(0, 0, 0);
+                rect(0, 0, canvas.width, canvas.height);
+            };
+            var enemyX = [];
+            var enemyY = [];
+            var enemyR = [];
+            var enemyMom = [];
+            var enemyCool = [];
+            var enemyHp = [];
+            var maxEnemyHp = [];
+            var bulletX = [];
+            var bulletY = [];
+            var bulletR = [];
+            var bulletTeam = [];
+            function Player() {
+                fill(100, 100, 100);
+                ellipse(player.x, player.y, 10, 10, player.r);
+                fill(0, 0, 255);
+                ellipse(player.x, player.y, 3, 3, player.r);
+                ellipse(player.x + cos(player.r) * 6, player.y + sin(player.r) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 1.05) * 6, player.y + sin(player.r + 1.05) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 2.1) * 6, player.y + sin(player.r + 2.1) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 3.15) * 6, player.y + sin(player.r + 3.15) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 4.2) * 6, player.y + sin(player.r + 4.2) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 5.25) * 6, player.y + sin(player.r + 5.25) * 6, 1.5, 1.5, player.r);
+                // left
+                if (keys[65] || keys[37]) {
+                    player.r-=0.01;
+                }
+                
+                // right
+                if (keys[68] || keys[39]) {
+                    player.r+=0.01;
+                }
+                
+                // up
+                if (keys[87] || keys[38]) {
+                    player.mom+=0.01;
+                }
+                
+                // down
+                if (keys[83] || keys[40]) {
+                    player.mom-=0.01;
+                }
+                
+                // space
+                if(keys[32] && player.cool <= 0 || clicked && player.cool <= 0) {
+                    bulletX.push(player.x)
+                    bulletY.push(player.y)
+                    bulletR.push(atan2(player.y - mouseY, player.x - mouseX) + 135)
+                    bulletTeam.push(0)
+                    player.cool = 20
+                }
+                
+                player.cool -= 1;
+                player.mom*=0.99;
+                player.x+=cos(player.r) * player.mom;
+                player.y+=sin(player.r) * player.mom;
+                if(player.x <= -10) {
+                    player.x = canvas.width + 10
+                }else if(player.x >= canvas.width + 10) {
+                    player.x = -10
+                }
+                if(player.y <= -10) {
+                    player.y = canvas.height + 10
+                }else if(player.y >= canvas.height + 10) {
+                    player.y = -10
+                }
+            }
+            function Enemy(i) {
+                fill(100, 100, 100);
+                ellipse(enemyX[i], enemyY[i], 10, 10, enemyR[i]);
+                fill(255, 0, 0);
+                rect(enemyX[i] - 10, enemyY[i] + 15, (20/maxEnemyHp[i]) * enemyHp[i], 3)
+                ellipse(enemyX[i], enemyY[i], 3, 3, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i]) * 6, enemyY[i] + sin(enemyR[i]) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 1.05) * 6, enemyY[i] + sin(enemyR[i] + 1.05) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 2.1) * 6, enemyY[i] + sin(enemyR[i] + 2.1) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 3.15) * 6, enemyY[i] + sin(enemyR[i] + 3.15) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 4.2) * 6, enemyY[i] + sin(enemyR[i] + 4.2) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 5.25) * 6, enemyY[i] + sin(enemyR[i] + 5.25) * 6, 1.5, 1.5, enemyR[i]);
+                enemyR[i] = atan2(player.y - enemyY[i], player.x - enemyX[i]);
+                enemyX[i]+=cos(enemyR[i]) * enemyMom[i];
+                enemyY[i]+=sin(enemyR[i]) * enemyMom[i];
+                enemyMom[i]*=0.99;
+                enemyMom[i]+=0.005;
+                enemyCool[i]-=1;
+                if(enemyCool[i] <= 0) {
+                    bulletX.push(enemyX[i])
+                    bulletY.push(enemyY[i])
+                    bulletR.push(enemyR[i])
+                    bulletTeam.push(1)
+                    player.cool = 10
+                    enemyCool[i] = 80
+                }
+            }
+            function Bullet(i) {
+                if(bulletTeam[i] === 0) {
+                    fill(0, 0, 255)
+                }else if(bulletTeam[i] === 1) {
+                    fill(255, 0, 0)
+                }
+                ellipse(bulletX[i], bulletY[i], 2, 2, bulletR[i])
+                bulletX[i]+=cos(bulletR[i]) * 2
+                bulletY[i]+=sin(bulletR[i]) * 2
+                if(bulletX[i] <= 0 || bulletX[i] >= canvas.width || bulletY[i] <= 0 || bulletY[i] >= canvas.height) {
+                    bulletX.splice(i, 1)
+                    bulletY.splice(i, 1)
+                    bulletR.splice(i, 1)
+                    bulletTeam.splice(i, 1)
+                }
+            }
+            function eCollideBullet(i, j) {
+                if(dist(bulletX[i], bulletY[i], enemyX[j], enemyY[j]) < 10 && bulletTeam[i] !== 1) {
+                    bulletX.splice(i, 1);
+                    bulletY.splice(i, 1);
+                    bulletR.splice(i, 1);
+                    bulletTeam.splice(i, 1);
+                    enemyHp[j]-=5;
+                    if(enemyHp[j] <= 0) {
+                        enemyX.splice(j, 1);
+                        enemyY.splice(j, 1);
+                        enemyR.splice(j, 1);
+                        enemyCool.splice(j, 1);
+                        enemyMom.splice(j, 1)
+                    }
+                }
+            }
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                switch(scene) {
+                    case "menu":
+                        starBackground()
+                    break;
+                    case "game":
+                        starBackground()
+                        Player()
+                        for(var i = 0; i < enemyX.length; i+=1) {
+                            Enemy(i)
+                        }
+                        for(var i = 0; i < bulletX.length; i+=1) {
+                            Bullet(i)
+                            for(var j = 0; j < enemyX.length; j+=1) {
+                                eCollideBullet(i, j)
+                            }
+                        }
+                        if(random(0, 1) < 0.001) {
+                            enemyX.push(-100 + (round(random(0, 1)) * (canvas.width + 200)));
+                            enemyY.push(random(0, canvas.height));
+                            enemyR.push(random(0, 360));
+                            enemyMom.push(0);
+                            enemyCool.push(20);
+                            maxEnemyHp.push(random(10, 100))
+                            enemyHp.push(maxEnemyHp[enemyX.length - 1])
+                        }
+                    break;
+                }
+                clicked = false
+            }
+            draw();
+            start();
+            clicked = false
+        </script>
+    </body>
+</html>
