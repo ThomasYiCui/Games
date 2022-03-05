@@ -71,7 +71,7 @@
                 ctx.font = size + "px Arial";
                 ctx.fillText(txt, x, y);
             }
-            function center(align) {
+            function textAlign(align) {
                 ctx.textAlign = align;
             }
             function lerp(a, b, t) {
@@ -117,13 +117,14 @@
         </script>
         <script>
             // game
-            var scene = "game";
+            var scene = "menu";
             var player = {
                 x: canvas.width/2,
                 y: canvas.height/2,
                 r: 0,
                 mom: 0,
                 cool: 10,
+                hp: 100
             };
             function starBackground() {
                 fill(0, 0, 0);
@@ -140,6 +141,7 @@
             var bulletY = [];
             var bulletR = [];
             var bulletTeam = [];
+            var wave = 0;
             function Player() {
                 fill(100, 100, 100);
                 ellipse(player.x, player.y, 10, 10, player.r);
@@ -216,12 +218,13 @@
                 if(enemyCool[i] <= 0) {
                     bulletX.push(enemyX[i])
                     bulletY.push(enemyY[i])
-                    bulletR.push(enemyR[i])
+                    bulletR.push(enemyR[i] + random(-0.1, 0.1))
                     bulletTeam.push(1)
                     player.cool = 10
                     enemyCool[i] = 80
                 }
             }
+            var dif = 0.001;
             function Bullet(i) {
                 if(bulletTeam[i] === 0) {
                     fill(0, 0, 255)
@@ -244,50 +247,123 @@
                     bulletY.splice(i, 1);
                     bulletR.splice(i, 1);
                     bulletTeam.splice(i, 1);
-                    enemyHp[j]-=5;
+                    enemyHp[j]-=25;
                     if(enemyHp[j] <= 0) {
                         enemyX.splice(j, 1);
                         enemyY.splice(j, 1);
                         enemyR.splice(j, 1);
                         enemyCool.splice(j, 1);
                         enemyMom.splice(j, 1)
+                        enemyHp.splice(j, 1)
+                        maxEnemyHp.splice(j, 1)
                     }
+                }
+            }
+            function pCollideBullet(i) {
+                if(dist(bulletX[i], bulletY[i], player.x, player.y) < 10 && bulletTeam[i] !== 0) {
+                    bulletX.splice(i, 1);
+                    bulletY.splice(i, 1);
+                    bulletR.splice(i, 1);
+                    bulletTeam.splice(i, 1);
+                    player.hp-=10
+                    if(player.hp <= 0) {
+                        wave = 0
+                        scene = "gameover";
+                        enemyX = [];
+                        enemyY = [];
+                        enemyR = [];
+                        enemyMom = [];
+                        enemyHp = [];
+                        maxEnemyHp = [];
+                        enemyCool = [];
+                        player = {
+                            x: canvas.width/2,
+                            y: canvas.height/2,
+                            r: 0,
+                            mom: 0,
+                            cool: 10,
+                            hp: 100
+                        }
+                        bulletX = [];
+                        bulletY = [];
+                        bulletR = [];
+                        bulletTeam = [];
+                    }
+                }
+            }
+            function button(x, y, w, h, t, txt) {
+                strokeWeight(3)
+                eRect(x, y, w, h, (0, 0, 0))
+                textAlign("center")
+                text(txt[0], x + w/2, y + h/2 + txt[1]/4, txt[1])
+                if(mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h && clicked) {
+                    t();
                 }
             }
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 switch(scene) {
                     case "menu":
-                        starBackground()
+                        starBackground();
+                        fill(255, 255, 255);
+                        text("Space Battle", canvas.width/2, canvas.height/2 - 75);
+                        stroke(255, 255, 255);
+                        button(canvas.width/2 - 100, canvas.height/2 + 25, 200, 40, function() {
+                            scene = "game"
+                        }, ["Play", 30]);
                     break;
                     case "game":
-                        starBackground()
-                        Player()
+                        textAlign("center");
+                        starBackground();
+                        fill(255, 255, 255);
+                        text("Wave " + wave, canvas.width/2, 30, 30);
+                        Player();
+                        fill(10, 10, 10);
+                        rect(canvas.width/2 - 150, canvas.height - 40, 300, 20)
+                        fill(255, 0, 0);
+                        rect(canvas.width/2 - 150, canvas.height - 40, player.hp * 3, 20);
+                        fill(0, 0, 0);
+                        text("Hp: " + player.hp, canvas.width/2, canvas.height - 25, 20);
                         for(var i = 0; i < enemyX.length; i+=1) {
-                            Enemy(i)
+                            Enemy(i);
                         }
                         for(var i = 0; i < bulletX.length; i+=1) {
-                            Bullet(i)
+                            Bullet(i);
                             for(var j = 0; j < enemyX.length; j+=1) {
-                                eCollideBullet(i, j)
+                                eCollideBullet(i, j);
+                            }
+                            pCollideBullet(i)
+                        }
+                        if(enemyX.length <= 0) {
+                            wave+=1;
+                            for(var i = 0; i < wave; i++) {
+                                enemyX.push(-300 + (round(random(0, 1)) * (canvas.width + 600)));
+                                enemyY.push(random(0, canvas.height));
+                                enemyR.push(random(0, 360));
+                                enemyMom.push(0);
+                                enemyCool.push(20);
+                                maxEnemyHp.push(random(10, 100));
+                                enemyHp.push(maxEnemyHp[enemyX.length - 1]);
                             }
                         }
-                        if(random(0, 1) < 0.001) {
-                            enemyX.push(-100 + (round(random(0, 1)) * (canvas.width + 200)));
-                            enemyY.push(random(0, canvas.height));
-                            enemyR.push(random(0, 360));
-                            enemyMom.push(0);
-                            enemyCool.push(20);
-                            maxEnemyHp.push(random(10, 100))
-                            enemyHp.push(maxEnemyHp[enemyX.length - 1])
-                        }
                     break;
+                    case "gameover":
+                        starBackground();
+                        fill(255, 255, 255);
+                        text("GG", canvas.width/2, canvas.height/2 - 75);
+                        stroke(255, 255, 255)
+                        button(canvas.width/2 - 100, canvas.height/2 - 25, 200, 40, function() {
+                            scene = "menu"
+                        }, ["Menu", 30]);
+                        button(canvas.width/2 - 100, canvas.height/2 + 45, 200, 40, function() {
+                            scene = "game"
+                        }, ["Restart", 30]);
                 }
-                clicked = false
+                clicked = false;
             }
             draw();
             start();
-            clicked = false
+            clicked = false;
         </script>
     </body>
 </html>
