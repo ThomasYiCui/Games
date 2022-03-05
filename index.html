@@ -65,7 +65,7 @@
                 ctx.stroke();
             }
             function start() {
-                var myVar = setInterval(draw, 1);
+                var myVar = setInterval(draw, 5);
             }
             function text(txt, x, y, size) {
                 ctx.font = size + "px Arial";
@@ -124,7 +124,8 @@
                 r: 0,
                 mom: 0,
                 cool: 10,
-                hp: 100
+                hp: 100,
+                shield: 100,
             };
             function starBackground() {
                 fill(0, 0, 0);
@@ -196,6 +197,26 @@
                 }else if(player.y >= canvas.height + 10) {
                     player.y = -10
                 }
+                fill(10, 10, 10);
+                rect(canvas.width/2 - 150, canvas.height - 40, 300, 20)
+                fill(255, 0, 0);
+                rect(canvas.width/2 - 150, canvas.height - 40, player.hp * 3, 20);
+                fill(0, 0, 0);
+                text("Hp: " + round(player.hp), canvas.width/2, canvas.height - 25, 20);
+                fill(10, 10, 10);
+                rect(canvas.width/2 - 150, canvas.height - 70, 300, 20)
+                fill(0, 0, 255);
+                rect(canvas.width/2 - 150, canvas.height - 70, player.shield * 3, 20);
+                fill(0, 0, 0);
+                text("Shield: " + round(player.shield), canvas.width/2, canvas.height - 52.5, 20);
+                if(player.hp < 100) {
+                    player.hp+=0.01;
+                    player.hp = constrain(player.hp, 0, 100)
+                }
+                if(player.shield < 100) {
+                    player.shield+=0.01;
+                    player.shield = constrain(player.shield, 0, 100)
+                }
             }
             function Enemy(i) {
                 fill(100, 100, 100);
@@ -265,7 +286,11 @@
                     bulletY.splice(i, 1);
                     bulletR.splice(i, 1);
                     bulletTeam.splice(i, 1);
-                    player.hp-=10
+                    if(player.shield >= 10) {
+                        player.shield-=10;
+                    } else {
+                        player.hp-=10;
+                    }
                     if(player.hp <= 0) {
                         wave = 0
                         scene = "gameover";
@@ -308,22 +333,13 @@
                         fill(255, 255, 255);
                         text("Space Battle", canvas.width/2, canvas.height/2 - 75, 50);
                         stroke(255, 255, 255);
-                        button(canvas.width/2 - 100, canvas.height/2 + 25, 200, 40, function() {
+                        button(canvas.width/2 - 100, canvas.height/2 - 25, 200, 40, function() {
                             scene = "game"
                         }, ["Play", 30]);
                     break;
                     case "game":
                         textAlign("center");
                         starBackground();
-                        fill(255, 255, 255);
-                        text("Wave " + wave, canvas.width/2, 30, 30);
-                        Player();
-                        fill(10, 10, 10);
-                        rect(canvas.width/2 - 150, canvas.height - 40, 300, 20)
-                        fill(255, 0, 0);
-                        rect(canvas.width/2 - 150, canvas.height - 40, player.hp * 3, 20);
-                        fill(0, 0, 0);
-                        text("Hp: " + player.hp, canvas.width/2, canvas.height - 25, 20);
                         for(var i = 0; i < enemyX.length; i+=1) {
                             Enemy(i);
                         }
@@ -334,16 +350,29 @@
                             }
                             pCollideBullet(i)
                         }
+                        fill(255, 255, 255);
+                        text("Wave " + wave, canvas.width/2, 30, 30);
+                        Player();
                         if(enemyX.length <= 0) {
                             wave+=1;
                             for(var i = 0; i < wave; i++) {
-                                enemyX.push(-300 + (round(random(0, 1)) * (canvas.width + 600)));
-                                enemyY.push(random(0, canvas.height));
-                                enemyR.push(random(0, 360));
-                                enemyMom.push(0);
-                                enemyCool.push(20);
-                                maxEnemyHp.push(random(10, 100));
-                                enemyHp.push(maxEnemyHp[enemyX.length - 1]);
+                                if(random(0, 1) < 0.5) {
+                                    enemyX.push(-300 + (round(random(0, 1)) * (canvas.width + 600)));
+                                    enemyY.push(random(0, canvas.height));
+                                    enemyR.push(random(0, 360));
+                                    enemyMom.push(0);
+                                    enemyCool.push(20);
+                                    maxEnemyHp.push(random(10, 100));
+                                    enemyHp.push(maxEnemyHp[enemyX.length - 1]);
+                                } else {
+                                    enemyX.push(random(0, canvas.height));
+                                    enemyY.push(-300 + (round(random(0, 1)) * (canvas.height + 600)));
+                                    enemyR.push(random(0, 360));
+                                    enemyMom.push(0);
+                                    enemyCool.push(20);
+                                    maxEnemyHp.push(random(10, 100));
+                                    enemyHp.push(maxEnemyHp[enemyX.length - 1]);
+                                }
                             }
                         }
                     break;
