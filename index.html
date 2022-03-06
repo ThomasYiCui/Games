@@ -118,6 +118,11 @@
         <script>
             // game
             var scene = "menu";
+            var data = 0;
+            var star = [];
+            for(var i = 0; i < 100; i+=1) {
+                star.push([round(random(0, canvas.width)), round(random(0, canvas.height)), round(random(10, 25)), false])
+            }
             var player = {
                 x: canvas.width/2,
                 y: canvas.height/2,
@@ -126,10 +131,34 @@
                 cool: 10,
                 hp: 100,
                 shield: 100,
+                reload: 20
             };
+            var enemys = {
+                "normal" : {
+                    health: 100,
+                    spd: 0.9,
+                    reload: 10,
+                }
+            }
             function starBackground() {
                 fill(0, 0, 0);
                 rect(0, 0, canvas.width, canvas.height);
+                fill(255, 255, 255)
+                for(var i = 0; i < star.length; i+=1) {
+                    if(random(0, 1) > 0.01) {
+                        star[i][3] = true
+                    }
+                    if(star[i][3]) {
+                        star[i][2]-=0.1;
+                        if(star[i][2] <= 0) {
+                            star[i][2] = round(random(10, 25));
+                            star[i][3] = false;
+                        }
+                    } else {
+                        star[i][2]+=1;
+                    }
+                    ellipse(star[i][0], star[i][1], star[i][2]/10, star[i][2]/10, 0)
+                }
             };
             var enemyX = [];
             var enemyY = [];
@@ -180,7 +209,7 @@
                     bulletY.push(player.y)
                     bulletR.push(atan2(player.y - mouseY, player.x - mouseX) + 135)
                     bulletTeam.push(0)
-                    player.cool = 20
+                    player.cool = player.reload
                 }
                 
                 player.cool -= 1;
@@ -211,7 +240,7 @@
                 text("Shield: " + round(player.shield), canvas.width/2, canvas.height - 52.5, 20);
                 if(player.hp < 100) {
                     player.hp+=0.01;
-                    player.hp = constrain(player.hp, 0, 100)
+                    player.hp = constrain(player.hp, -100, 100)
                 }
                 if(player.shield < 100) {
                     player.shield+=0.01;
@@ -245,7 +274,6 @@
                     enemyCool[i] = 80
                 }
             }
-            var dif = 0.001;
             function Bullet(i) {
                 if(bulletTeam[i] === 0) {
                     fill(0, 0, 255)
