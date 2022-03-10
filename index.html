@@ -85,6 +85,17 @@
                 ctx.ellipse(x, y, radiusX, radiusY, rotation, 0, 2 * Math.PI);
                 ctx.fill();
             }
+            function polygon(sides, color) {
+                ctx.fillStyle = '#f00';
+                ctx.beginPath();
+                ctx.moveTo(poly[0], poly[1]);
+                for(item = 2; item < sides.length; item+=2){
+                    ctx.lineTo(sides[item], poly[sides + 1])
+                }
+                ctx.closePath();
+                ctx.fill(color);
+
+            }
             function constrain(num, m, ma) {
                 if(num < m) {
                     num = m;
@@ -119,10 +130,6 @@
             // game
             var scene = "menu";
             var data = 0;
-            var star = [];
-            for(var i = 0; i < 100; i+=1) {
-                star.push([round(random(0, canvas.width)), round(random(0, canvas.height)), round(random(10, 25)), false])
-            }
             var player = {
                 x: canvas.width/2,
                 y: canvas.height/2,
@@ -143,22 +150,6 @@
             function starBackground() {
                 fill(0, 0, 0);
                 rect(0, 0, canvas.width, canvas.height);
-                fill(255, 255, 255)
-                for(var i = 0; i < star.length; i+=1) {
-                    if(random(0, 1) > 0.01) {
-                        star[i][3] = true
-                    }
-                    if(star[i][3]) {
-                        star[i][2]-=0.1;
-                        if(star[i][2] <= 0) {
-                            star[i][2] = round(random(10, 25));
-                            star[i][3] = false;
-                        }
-                    } else {
-                        star[i][2]+=1;
-                    }
-                    ellipse(star[i][0], star[i][1], star[i][2]/10, star[i][2]/10, 0)
-                }
             };
             var enemyX = [];
             var enemyY = [];
@@ -174,15 +165,15 @@
             var wave = 0;
             function Player() {
                 fill(100, 100, 100);
-                ellipse(player.x, player.y, 10, 10, player.r);
+                ellipse(player.x, player.y, 12, 10, player.r);
                 fill(0, 0, 255);
                 ellipse(player.x, player.y, 3, 3, player.r);
-                ellipse(player.x + cos(player.r) * 6, player.y + sin(player.r) * 6, 1.5, 1.5, player.r);
-                ellipse(player.x + cos(player.r + 1.05) * 6, player.y + sin(player.r + 1.05) * 6, 1.5, 1.5, player.r);
-                ellipse(player.x + cos(player.r + 2.1) * 6, player.y + sin(player.r + 2.1) * 6, 1.5, 1.5, player.r);
-                ellipse(player.x + cos(player.r + 3.15) * 6, player.y + sin(player.r + 3.15) * 6, 1.5, 1.5, player.r);
-                ellipse(player.x + cos(player.r + 4.2) * 6, player.y + sin(player.r + 4.2) * 6, 1.5, 1.5, player.r);
-                ellipse(player.x + cos(player.r + 5.25) * 6, player.y + sin(player.r + 5.25) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r) * 8, player.y + sin(player.r) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 1.05) * 8, player.y + sin(player.r + 1.05) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 2.1) * 8, player.y + sin(player.r + 2.1) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 3.15) * 8, player.y + sin(player.r + 3.15) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 4.2) * 8, player.y + sin(player.r + 4.2) * 6, 1.5, 1.5, player.r);
+                ellipse(player.x + cos(player.r + 5.25) * 8, player.y + sin(player.r + 5.25) * 6, 1.5, 1.5, player.r);
                 // left
                 if (keys[65] || keys[37]) {
                     player.r-=0.01;
@@ -249,16 +240,16 @@
             }
             function Enemy(i) {
                 fill(100, 100, 100);
-                ellipse(enemyX[i], enemyY[i], 10, 10, enemyR[i]);
+                ellipse(enemyX[i], enemyY[i], 12, 10, enemyR[i]);
                 fill(255, 0, 0);
                 rect(enemyX[i] - 10, enemyY[i] + 15, (20/maxEnemyHp[i]) * enemyHp[i], 3)
                 ellipse(enemyX[i], enemyY[i], 3, 3, enemyR[i]);
-                ellipse(enemyX[i] + cos(enemyR[i]) * 6, enemyY[i] + sin(enemyR[i]) * 6, 1.5, 1.5, enemyR[i]);
-                ellipse(enemyX[i] + cos(enemyR[i] + 1.05) * 6, enemyY[i] + sin(enemyR[i] + 1.05) * 6, 1.5, 1.5, enemyR[i]);
-                ellipse(enemyX[i] + cos(enemyR[i] + 2.1) * 6, enemyY[i] + sin(enemyR[i] + 2.1) * 6, 1.5, 1.5, enemyR[i]);
-                ellipse(enemyX[i] + cos(enemyR[i] + 3.15) * 6, enemyY[i] + sin(enemyR[i] + 3.15) * 6, 1.5, 1.5, enemyR[i]);
-                ellipse(enemyX[i] + cos(enemyR[i] + 4.2) * 6, enemyY[i] + sin(enemyR[i] + 4.2) * 6, 1.5, 1.5, enemyR[i]);
-                ellipse(enemyX[i] + cos(enemyR[i] + 5.25) * 6, enemyY[i] + sin(enemyR[i] + 5.25) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i]) * 8, enemyY[i] + sin(enemyR[i]) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 1.05) * 8, enemyY[i] + sin(enemyR[i] + 1.05) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 2.1) * 8, enemyY[i] + sin(enemyR[i] + 2.1) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 3.15) * 8, enemyY[i] + sin(enemyR[i] + 3.15) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 4.2) * 8, enemyY[i] + sin(enemyR[i] + 4.2) * 6, 1.5, 1.5, enemyR[i]);
+                ellipse(enemyX[i] + cos(enemyR[i] + 5.25) * 8, enemyY[i] + sin(enemyR[i] + 5.25) * 6, 1.5, 1.5, enemyR[i]);
                 enemyR[i] = atan2(player.y - enemyY[i], player.x - enemyX[i]);
                 enemyX[i]+=cos(enemyR[i]) * enemyMom[i];
                 enemyY[i]+=sin(enemyR[i]) * enemyMom[i];
